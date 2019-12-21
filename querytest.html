@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test For Query builder page</title>
+</head>
+<body>
+<form name="sender" action="querybuilder.php" method="post" enctype="multipart/form-data">
+    Функция(select/update/insert/delete)<input type="text" name="function"/><br><br>
+    Таблица1<input type="text" name="table1"/><br><br>
+    Таблица2<input type="text" name="table2"/><br><br>
+    Выбранные поля<input type="text" name="fields"/><br><br>
+    Значения для подстановки( через запятую)<input type="text" name="insert"/><br><br>
+    Условие<input type="text" name="condition"/><br><br>
+    Группировка по полю:<input type="text" name="group"/><br><br>
+    Ключевое поле1<input type="text" name="key1"/><br><br>
+    Ключевое поле2<input type="text" name="key2"/><br><br>
+    <input type="submit" value="Погнали"><br><br>
+</form>
+</body>
+</html>
