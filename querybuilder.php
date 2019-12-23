@@ -1,100 +1,125 @@
-<?php//Sadayk
-abstract class querybuiler
-{
-    public function select($table)
-    {
-        return "SELECT * FROM ".$table;
+<?php
+abstract class query{
+
+}
+class selectclass extends query{
+    protected $tablename;
+    protected $fields;
+    protected $condition;
+    protected $limit;
+    protected $group;
+    function table($tableinput){
+        $this->tablename=$tableinput;
+        return $this;
+    }
+    function select($fieldsinput){
+        $this->fields=$fieldsinput;
+        return $this;
+    }
+    function where($conditioninput){
+        $this->condition=$conditioninput;
+        return $this;
+    }
+    function limit($limitinput){
+        $this->limit=$limitinput;
+        return $this;
+    }
+    function group($groupfield){
+        $this->group=$groupfield;
+        return $this;
+    }
+    function getQuery(){
+        $sqlstring="SELECT ";
+        if(isset($this->fields)) $sqlstring=$sqlstring.$this->fields; else $sqlstring=$sqlstring."*";
+        if(isset($this->tablename)) $sqlstring=$sqlstring." FROM ".$this->tablename;
+        if(isset($this->condition)) $sqlstring=$sqlstring." WHERE ".$this->condition;
+        if(isset($this->group)) $sqlstring=$sqlstring." GROUP BY ".$this->group;
+        if(isset($this->order)) $sqlstring=$sqlstring." ORDER BY ".$this->order;
+        if(isset($this->limit)) $sqlstring=$sqlstring." LIMIT  ".$this->LIMIT;
+        echo $sqlstring;
+        return $sqlstring;
+    }
+
+}
+class insertclass extends query{
+    protected $tablename;
+    protected $fields;
+    protected $values;
+    function table($tableinput){
+        $this->tablename=$tableinput;
+        return $this;
+    }
+    function field($fieldsinput){
+        $this->fields=$fieldsinput;
+        return $this;
+    }
+    function valuesin($valuesinput){
+//        foreach ($valuesinput as $key=>$value)
+//            $this->values=$this->values.$value.",";
+//        $this->values=substr($this->values,0,-1);
+        $this->values=$valuesinput;
+        return $this;
+    }
+    function getQuery(){
+        $sqlstring="INSERT INTO ";
+        if(isset($this->tablename)) $sqlstring=$sqlstring.$this->tablename;
+        if(isset($this->fields)) $sqlstring=$sqlstring."(".$this->tablename.") ";
+        if(isset($this->values)) $sqlstring=$sqlstring." VALUES(".$this->values.")";
+        echo $sqlstring;
+        return $sqlstring;
     }
 }
-
-class query extends querybuiler
-{
-    public function select($table,$columns,$condition,$group)
-    {
-        if ($columns=="") $columns="*";
-        if(($condition=="")&&($group=="")){
-        return "SELECT " . $columns . " from " . $table;
-        }elseif(($condition!="")&&($group=="")){
-            return "SELECT " . $columns . " from " . $table." WHERE ".$condition;
-        }elseif(($condition=="")&&($group!="")){
-            return "SELECT " . $columns . " from " . $table." GROUP BY ".$group;
-        }else{
-            return "SELECT " . $columns . " from " . $table." WHERE ".$condition." GROUP BY ".$group;
-        }
+class deleteclass extends query{
+    protected $tablename;
+    protected $condition;
+    function table($tableinpit){
+        $this->tablename=$tableinpit;
+        return $this;
+    }
+    function where($conditioninput){
+        $this->condition=$conditioninput;
+        return $this;
+    }
+    function getQuery(){
+        $sqlstring="DELETE FROM ";
+        if(isset($this->tablename)) $sqlstring=$sqlstring.$this->tablename;
+        if(isset($this->condition)) $sqlstring=$sqlstring." WHERE ".$this->condition;
+        echo $sqlstring;
+        return $sqlstring;
     }
 
-    public function selectm($table1,$table2,$columns,$key1,$key2,$condition,$group)
-    {
-        if(($condition=="")&&($group=="")) {
-            return "SELECT " . $columns . " FROM " . $table1 . " INNER JOIN " . $table2 . " ON " . $table1 . "." . $key1 . "=" . $table2 . "." . $key2;
-        }elseif(($condition!="")&&($group=="")) {
-            return "SELECT " . $columns . " FROM " . $table1 . " INNER JOIN " . $table2 . " ON " . $table1 . "." . $key1 . "=" . $table2 . "." . $key2." WHERE ".$condition;
-        }elseif(($condition=="")&&($group!="")){
-            return "SELECT " . $columns . " FROM " . $table1 . " INNER JOIN " . $table2 . " ON " . $table1 . "." . $key1 . "=" . $table2 . "." . $key2." GROUP BY ".$group;
-        }else{
-            return "SELECT " . $columns . " FROM " . $table1 . " INNER JOIN " . $table2 . " ON " . $table1 . "." . $key1 . "=" . $table2 . "." . $key2." WHERE ".$condition." GROUP BY ".$group;
-        }
+}
+class updateclass extends query{
+    protected $table;
+    protected $condition;
+    protected $values;
+    function table($tableinput){
+        $this->table=$tableinput;
+        return $this;
     }
-    public function insert($table,$fields,$values){
-        return "INSERT INTO ".$table."(".$fields.") VALUES(".$values.");";
+    function where($conditioninput){
+        $this->condition=$conditioninput;
+        return $this;
     }
-    public function update($table,$fields,$values,$condition){
-        $fieldsarray=mb_split(",",$fields);
-        $valuesarray=mb_split(",",$values);
-        $sql="UPDATE ".$table." SET ";
-        if(count($fieldsarray)==count($valuesarray)){
-            foreach ($fieldsarray as $key=>$value){
-                $sql=$sql.$fieldsarray[$key]."=".$valuesarray[$key].",";
-            }
-            $sql = substr($sql,0,-1);
-            $sql=$sql." WHERE ".$condition;
-            return $sql;
-        }else {
-            echo "Несовпадение количества полей";
-            echo "В полях: ".count($fieldsarray)." в значениях: ".count($valuesarray);
-        }
+    function set($valuesinput){
+        $this->values=$valuesinput;
+        return $this;
     }
-    public function delete($table,$condition){
-        return "DELETE FROM ".$table." WHERE ".$condition;
+    function getQuery(){
+        $sqlstring="UPDATE ";
+        if(isset($this->table)) $sqlstring=$sqlstring.$this->table;
+        if(isset($this->values)) $sqlstring=$sqlstring." SET ".$this->values;
+        if(isset($this->condition)) $sqlstring=$sqlstring." WHERE ".$this->condition;
+        echo $sqlstring;
+        return $sqlstring;
     }
 }
+//$query=new selectclass();
+//$query->table(table1)->getQuery();
+//$query=new insertclass();
+//$query->table(tablename)->valuesin("value1,value2,value3")->getQuery();
+//$query=new deleteclass();
+//$query->table(table1)->where("Условие1=условие1")->getQuery();
+$query=new updateclass();
+$query->table(table1)->set("animal=cat,name=Матроскин")->where("Хозяин='Дядя Фёдор'")->getQuery();
 
-    $classquery=new query;
-    if(mb_strtolower($_POST['function'])=="select")
-    {
-        if(($_POST['table1']!="")&&($_POST['table2']=="")){
-            $sqltext=$classquery->select($_POST['table1'],$_POST['fields'],$_POST['condition'],$_POST['group']);
-            //echo $sqltext;
-        }elseif (($_POST['table1']!="")&&($_POST['table2']!="")&&($_POST['fields']!="")&&($_POST['key1']!="")&&($_POST['key2']!=""))
-        {
-            $sqltext=$classquery->selectm($_POST['table1'],$_POST['table2'],$_POST['fields'],$_POST['key1'],$_POST['key2'],$_POST['condition'],$_POST['group']);
-           // echo $sqltext;
-        }else{
-            echo "Неверный ввод данных!";
-        }
-    }elseif(mb_strtolower($_POST['function'])=="insert"){
-        if (($_POST['table1']!="")&&($_POST['fields']!="")&&($_POST['insert']!="")){
-            $sqltext=$classquery->insert($_POST['table1'],$_POST['fields'],$_POST['insert']);
-           // echo $sqltext;
-        }
-    }elseif (mb_strtolower($_POST['function'])=="update"){
-        if (($_POST['table1']!="")&&($_POST['fields']!="")&&($_POST['insert']!="")&&($_POST['condition']!="")){
-            $sqltext=$classquery->update($_POST['table1'],$_POST['fields'],$_POST['insert'],$_POST['condition']);
-            //echo $sqltext;
-        }
-    }elseif(mb_strtolower($_POST['function'])=="delete"){
-        if(($_POST['table1']!="")&&($_POST['condition']!="")){
-            $sqltext=$classquery->delete($_POST['table1'],$_POST['condition']);
-            //echo $sqltext;
-        }
-    }else echo "Ошибка ввода";
-    if($sqltext!=""){
-        try {
-            echo $sqltext;
-            $dbh = new PDO("TEST.DB","user","password");
-            //$result=$dbh->query($sqltext);
-        } catch (PDOException $e) {
-           // die('Подключение не удалось: ' . $e->getMessage());
-        }
-    }
-//    $sqltext=$classquery->select($_POST['table1'],$_POST['fields']);
