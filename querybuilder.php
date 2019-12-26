@@ -1,125 +1,134 @@
 <?php
-abstract class query{
-
-}
-class selectclass extends query{
-    protected $tablename;
+abstract class abstractquery{
+    public $connection;
+    protected $table;
     protected $fields;
+    function table($tableinput){
+        $this->table=(mysqli_real_escape_string($this->connection,$tableinput));
+        return $this;
+    }
+    function fields($fieldsinput){
+        $this->fields=mysqli_real_escape_string($this->connection,$fieldsinput);
+        return $this;
+    }
+}
+class query extends abstractquery
+{
     protected $condition;
     protected $limit;
     protected $group;
-    function table($tableinput){
-        $this->tablename=$tableinput;
+    protected $id;
+    protected $values;
+    function where($conditioninput)
+    {
+        $this->condition = mysqli_real_escape_string($this->connection,$conditioninput);
         return $this;
     }
-    function select($fieldsinput){
-        $this->fields=$fieldsinput;
+
+    function id($idinput){
+        $this->id=mysqli_real_escape_string($this->connection,$idinput);
         return $this;
     }
-    function where($conditioninput){
-        $this->condition=$conditioninput;
+    function limit($limitinput)
+    {
+        $this->limit = mysqli_real_escape_string($this->connection,$limitinput);
         return $this;
     }
-    function limit($limitinput){
-        $this->limit=$limitinput;
+
+    function values(array $valuesinput){
+        $this->values=$valuesinput;
         return $this;
     }
-    function group($groupfield){
-        $this->group=$groupfield;
+
+    function group($groupfield)
+    {
+        $this->group = mysqli_real_escape_string($this->connection,$groupfield);
         return $this;
     }
-    function getQuery(){
+    function getselectQuery(){
         $sqlstring="SELECT ";
-        if(isset($this->fields)) $sqlstring=$sqlstring.$this->fields; else $sqlstring=$sqlstring."*";
-        if(isset($this->tablename)) $sqlstring=$sqlstring." FROM ".$this->tablename;
-        if(isset($this->condition)) $sqlstring=$sqlstring." WHERE ".$this->condition;
-        if(isset($this->group)) $sqlstring=$sqlstring." GROUP BY ".$this->group;
-        if(isset($this->order)) $sqlstring=$sqlstring." ORDER BY ".$this->order;
-        if(isset($this->limit)) $sqlstring=$sqlstring." LIMIT  ".$this->LIMIT;
-        echo $sqlstring;
+
+        if(isset($this->fields)) {
+            $sqlstring .=$this->fields;
+        }else {
+            $sqlstring.="*";
+        }
+        if(isset($this->table)) {
+            $sqlstring.=" FROM ".$this->table;
+        }
+        if(isset($this->condition)) {
+            $sqlstring.=" WHERE ".$this->condition;
+        }
+        if(isset($this->group)) {
+            $sqlstring.=" GROUP BY ".$this->group;
+        }
+        if(isset($this->order)) {
+            $sqlstring.=" ORDER BY ".$this->order;
+        }
+        if(isset($this->limit)) {
+            $sqlstring.=" LIMIT  ".$this->limit;
+        }
         return $sqlstring;
     }
 
-}
-class insertclass extends query{
-    protected $tablename;
-    protected $fields;
-    protected $values;
-    function table($tableinput){
-        $this->tablename=$tableinput;
-        return $this;
+    function getinsertQuery(){
+        if(isset($this->id)){
+            $sqlstring="UPDATE ";
+            if(isset($this->table)) {
+                $sqlstring.=$this->table;
+            }
+            if(isset($this->values)) {
+                $sqlstring.=" SET ";
+                foreach($this->values as $key=>$value){
+                    $sqlstring.=mysqli_real_escape_string($this->connection,$key)."='".mysqli_real_escape_string($this->connection,$value)."',";
+                }
+                $sqlstring=substr($sqlstring,0,-1)." ";
+            }
+            if(isset($this->id)) {
+                $sqlstring.=" WHERE id=".$this->id;
+            }
+            return $sqlstring;
+        }
+        else
+        {
+            $sqlstring="INSERT INTO ";
+            if(isset($this->table)) {
+                $sqlstring.=$this->table;
+            }
+            if(isset($this->values)) {
+                $sqlstring.=" VALUES(";
+                foreach($this->values as $key=>$value){
+                    $sqlstring.="'".mysqli_real_escape_string($this->connection,$value)."',";
+                }
+                $sqlstring=substr($sqlstring,0,-1).") ";
+            }
+            return $sqlstring;
+        }
     }
-    function field($fieldsinput){
-        $this->fields=$fieldsinput;
-        return $this;
-    }
-    function valuesin($valuesinput){
-//        foreach ($valuesinput as $key=>$value)
-//            $this->values=$this->values.$value.",";
-//        $this->values=substr($this->values,0,-1);
-        $this->values=$valuesinput;
-        return $this;
-    }
-    function getQuery(){
-        $sqlstring="INSERT INTO ";
-        if(isset($this->tablename)) $sqlstring=$sqlstring.$this->tablename;
-        if(isset($this->fields)) $sqlstring=$sqlstring."(".$this->tablename.") ";
-        if(isset($this->values)) $sqlstring=$sqlstring." VALUES(".$this->values.")";
-        echo $sqlstring;
-        return $sqlstring;
-    }
-}
-class deleteclass extends query{
-    protected $tablename;
-    protected $condition;
-    function table($tableinpit){
-        $this->tablename=$tableinpit;
-        return $this;
-    }
-    function where($conditioninput){
-        $this->condition=$conditioninput;
-        return $this;
-    }
-    function getQuery(){
+
+    function getdeleteQuery(){
         $sqlstring="DELETE FROM ";
-        if(isset($this->tablename)) $sqlstring=$sqlstring.$this->tablename;
-        if(isset($this->condition)) $sqlstring=$sqlstring." WHERE ".$this->condition;
-        echo $sqlstring;
+        if(isset($this->tablename)) {
+            $sqlstring.=$this->table;
+        }
+        if(isset($this->id)) {
+            $sqlstring.=" WHERE id=".$this->id;
+        }
         return $sqlstring;
+
     }
 
-}
-class updateclass extends query{
-    protected $table;
-    protected $condition;
-    protected $values;
-    function table($tableinput){
-        $this->table=$tableinput;
-        return $this;
-    }
-    function where($conditioninput){
-        $this->condition=$conditioninput;
-        return $this;
-    }
-    function set($valuesinput){
-        $this->values=$valuesinput;
-        return $this;
-    }
-    function getQuery(){
-        $sqlstring="UPDATE ";
-        if(isset($this->table)) $sqlstring=$sqlstring.$this->table;
-        if(isset($this->values)) $sqlstring=$sqlstring." SET ".$this->values;
-        if(isset($this->condition)) $sqlstring=$sqlstring." WHERE ".$this->condition;
-        echo $sqlstring;
-        return $sqlstring;
-    }
-}
-//$query=new selectclass();
-//$query->table(table1)->getQuery();
-//$query=new insertclass();
-//$query->table(tablename)->valuesin("value1,value2,value3")->getQuery();
-//$query=new deleteclass();
-//$query->table(table1)->where("Условие1=условие1")->getQuery();
-$query=new updateclass();
-$query->table(table1)->set("animal=cat,name=Матроскин")->where("Хозяин='Дядя Фёдор'")->getQuery();
 
+}
+require_once("connection.php");
+$mysqli=new mysqli($host,$login,$password,'librarysadayk');
+$myquery=new query();
+$myquery->connection=$mysqli;
+$sqlstring= $myquery->table(book)->values(["Name"=>"SCP Containment Breach","Author"=>"jiri'n'o'v\ski","Lists"=>250,"Price"=>10,"Category"=>"Fantasy"])->id(6)->getinsertQuery();
+echo $sqlstring;
+if($mysqli->query($sqlstring)===TRUE){
+    print_r("Запись добавлена!");
+}
+else{
+    print_r("Ошибка добавления");
+}
